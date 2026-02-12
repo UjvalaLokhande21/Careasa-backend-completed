@@ -34,42 +34,13 @@ app.get("/", (req, res) => {
 });
 
 // ===============================
-// USER ID ROUTE
-// ===============================
-app.post('/get-user-id', async (req, res) => {
-  try {
-    const { firebaseUid } = req.body;
-
-    if (!firebaseUid) {
-      return res.status(400).json({ error: 'Firebase UID is required!' });
-    }
-
-    const result = await sql`
-      SELECT user_id FROM users_ WHERE firebase_uid = ${firebaseUid}
-    `;
-
-    if (result.length === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json({
-      success: true,
-      userId: result[0].user_id
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database Error", details: err.message });
-  }
-});
-
-// ===============================
 // COMPLAINT ROUTES
 // ===============================
 app.post("/complaint", async (req, res) => {
+  const{userId}=req.body
   console.log('complaint is responding ');
   try {
-    const userId = 'b8a13133-8b32-4b37-a9cb-74ad18992b85';
+    
 
     console.log('Useridtoconsole :D ', userId);
 
@@ -191,7 +162,7 @@ app.get("/complaint/latest/:userId", async (req, res) => {
 app.post("/responses", async (req, res) => {
   try {
     const { userId, questionIds, answers } = req.body;
-
+    
     if (!userId || !questionIds || !answers) {
       return res.status(400).json({ error: "Missing fields" });
     }

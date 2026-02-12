@@ -49,8 +49,12 @@ class _OrganisationUserSignupPageState
 
       if (!mounted) return;
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
+        final userId = data['userId'];
+        if (userId != null) {
+    
         final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userId.toString()); 
         await prefs.remove('userType');
         await prefs.setString('userType', 'organisation');
 
@@ -58,6 +62,7 @@ class _OrganisationUserSignupPageState
           context,
           Routes.primary,
         );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["error"] ?? "Signup failed")),

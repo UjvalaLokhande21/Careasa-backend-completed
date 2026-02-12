@@ -56,6 +56,7 @@ class Routes {
   static const String organisationUsersignup = '/organisationUserSignup';
   static const String reportmonitoringpage = '/reportMonitoring';
   // static const String roleSelectionPage = '/roleSelection';
-  
-
+  static const String workExperienceIntro = '/workExperienceIntro';
+  static const String normalUserQuiz = '/normal-user-quiz';
+  static const String orgUserQuiz = '/org-user-quiz';
 }

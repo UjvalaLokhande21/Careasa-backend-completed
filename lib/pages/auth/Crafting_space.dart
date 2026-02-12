@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../navigation/routes.dart';
 import '../main_screens/home_page_screen.dart';
 import '../question/assesment_page_screen.dart';
+import '../question/org_questions/orgquizstart.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
@@ -50,24 +52,45 @@ class _LoadingPageState extends State<LoadingPage> {
         }
       } else {
         _timer?.cancel();
-        _navigateToAssessment();
+        _navigateBasedOnUserType();
       }
     });
   }
 
-  void _navigateToAssessment() {
-    // We use pushAndRemoveUntil so the user can't "Go Back" into the loading animation
-    Navigator.of(context).pushAndRemoveUntil(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const WellbeingAssessmentScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 800),
-      ),
-      (route) => false,
-    );
+  Future<void> _navigateBasedOnUserType() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userType = prefs.getString('userType');
+
+    if (!mounted) return;
+
+    // Route based on user type
+    if (userType == 'organisation') {
+      // Org users go to Work Experience Intro Screen
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const WorkExperienceIntroScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 800),
+        ),
+        (route) => false,
+      );
+    } else {
+      // Normal users go directly to their quiz (WellbeingAssessmentScreen)
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              WellbeingAssessmentScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 800),
+        ),
+        (route) => false,
+      );
+    }
   }
 
   @override

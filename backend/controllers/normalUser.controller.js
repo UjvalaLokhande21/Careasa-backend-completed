@@ -22,9 +22,10 @@ export const signupNormalUser = async (req, res) => {
 
     console.log('✅ INSERTED:', result.rows[0]);
 
-    res.status(201).json({
+    res.status(200).json({
       message: 'Normal user created',
-      user: result.rows[0],
+      userId: result.rows[0].id, 
+      email: result.rows[0].email,
     });
   } catch (err) {
     console.error('❌ DB ERROR:', err.message);

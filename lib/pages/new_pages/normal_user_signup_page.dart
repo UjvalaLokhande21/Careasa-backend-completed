@@ -25,7 +25,7 @@ class _NormalUserSignupPageState
   bool obscurePassword = true;
 
   String get baseUrl =>
-      kIsWeb ? "http://localhost:3000" : "http://10.0.2.2:3000";
+      kIsWeb ? "http://localhost:5000" : "http://10.0.2.2:3000";
 
   Future<void> signupNormalUser() async {
     setState(() => isLoading = true);
@@ -45,18 +45,25 @@ class _NormalUserSignupPageState
 
       if (!mounted) return;
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+      final userId = data['userId'];
+      
+      if (userId != null) {
         final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userId.toString());
         await prefs.setString('userType', 'normal');
 
+        print('✅ Normal user signed up. UserId: $userId');
         Navigator.pushReplacementNamed(
           context,
-          Routes.primary,
+          Routes.primary
+          ,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["error"] ?? "Signup failed")),
         );
+      }
       }
     } catch (e) {
       if (!mounted) return;

@@ -39,14 +39,20 @@ class _LoginPageState extends State<LoginPage> {
 
       final data = jsonDecode(response.body);
 
+      
+
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
-        final role = data["role"];
-
-        if (!mounted) return;
-
+      final userId = data['userId'];
+      final role = data['role'];
+      
+      if (userId != null && role != null) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('userType');
+        await prefs.setString('userId', userId.toString());
+        await prefs.setString('userType', role);
 
+        print('✅ Logged in. UserId: $userId, Role: $role');
         if (role == "normal_user") {
           await prefs.setString('userType', 'normal');
           Navigator.pushReplacementNamed(context, Routes.primary);
@@ -69,6 +75,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["error"] ?? "Login failed")),
         );
+      }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

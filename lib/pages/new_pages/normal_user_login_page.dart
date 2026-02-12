@@ -44,18 +44,25 @@ class _NormalUserLoginPageState
 
       if (response.statusCode == 200) {
         final role = data["role"];
+        final userId = data["userId"]; 
 
         if (role == "normal_user") {
-          final prefs = await SharedPreferences.getInstance();
+          if (userId != null) { 
+            final prefs = await SharedPreferences.getInstance();
+            
+            await prefs.setString('userId', userId.toString());  
+            await prefs.setString('userType', 'normal');
 
-          await prefs.remove('userType');
-          await prefs.setString('userType', 'normal');
+            print('✅ Login successful. UserId: $userId, Role: $role');
+
+
 
           Navigator.pushReplacementNamed(
             context,
             Routes.primary,
           );
-        } else {
+        } 
+        }else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content:
@@ -63,6 +70,7 @@ class _NormalUserLoginPageState
             ),
           );
         }
+        
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -71,6 +79,7 @@ class _NormalUserLoginPageState
           ),
         );
       }
+      
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

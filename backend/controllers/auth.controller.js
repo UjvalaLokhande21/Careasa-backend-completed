@@ -35,6 +35,7 @@ export const loginUser = async (req, res) => {
       return res.json({
         message: 'Login successful',
         role: 'normal_user',
+        userId: user.id,
         token,
         dashboard: 'NormalUserDashboard',
       });
@@ -65,6 +66,7 @@ export const loginUser = async (req, res) => {
       return res.json({
         message: 'Login successful',
         role: 'organisation_user',
+        userId: user.id,
         token,
         dashboard: 'OrganisationUserDashboard',
       });
@@ -95,6 +97,7 @@ export const loginUser = async (req, res) => {
       return res.json({
         message: 'Login successful',
         role: 'hr',
+        userId: user.id, 
         token,
         dashboard: 'HrDashboard',
       });

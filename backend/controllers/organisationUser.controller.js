@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import { pool } from '../db.js';
+import { response } from 'express';
 
 export const signupOrganisationUser = async (req, res) => {
   console.log('📩 BODY RECEIVED:', req.body);
@@ -22,10 +23,11 @@ export const signupOrganisationUser = async (req, res) => {
     );
 
     console.log('✅ INSERTED:', result.rows[0]);
-
-    res.status(201).json({
+    console.log(`Status Code From Signup :${response.statusCode}`)
+    res.status(200).json({
       message: 'Organisation user created',
-      user: result.rows[0],
+      userId: result.rows[0].id,
+      email: result.rows[0].email,
     });
   } catch (err) {
     console.error('❌ DB ERROR:', err.message);

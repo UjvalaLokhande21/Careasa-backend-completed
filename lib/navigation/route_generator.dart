@@ -63,7 +63,8 @@ import 'package:firstproduction_pro/pages/new_pages/organisation_user_dashboard_
 import 'package:firstproduction_pro/pages/new_pages/organisation_user_signup_page.dart';
 import 'package:firstproduction_pro/pages/new_pages/report_monitoring_page.dart';
 import 'package:firstproduction_pro/pages/new_pages/role_selection_page.dart';
-
+import 'package:firstproduction_pro/pages/question/org_questions/question1.dart';
+import 'package:firstproduction_pro/pages/question/org_questions/orgquizstart.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class RouteGenerator {
@@ -264,11 +265,16 @@ class RouteGenerator {
           return MaterialPageRoute(builder: (_) => const ReportMonitoringPage());
         // case Routes.roleSelectionPage:
         //   return MaterialPageRoute(builder: (_) => const RoleSelectionPage());
+        case Routes.orgUserQuiz:
+          return MaterialPageRoute(builder: (_) => const Question1WorkExperience());
+        case Routes.normalUserQuiz:
+          return MaterialPageRoute(builder: (_) => WellbeingAssessmentScreen());
 
-      default:
-        return _errorRoute();
-    }
-  }
+        
+        default:
+          return _errorRoute();
+            }
+          }
 
   static Route<dynamic> _errorRoute() {
     return MaterialPageRoute(

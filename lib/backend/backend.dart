@@ -1,8 +1,27 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:shared_preferences/shared_preferences.dart';
 const String baseUrl = 'http://localhost:5000';
-const String HARDCODED_USER_ID = 'b8a13133-8b32-4b37-a9cb-74ad18992b85'; 
+class UserSession {
+  static const String _userIdKey = 'userId';
+  
+  static Future<void> saveUserId(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userIdKey, userId);
+    print('✅ User ID saved: $userId');
+  }
+  
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userIdKey);
+  }
+  
+  static Future<void> clearUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_userIdKey);
+    print('🗑️ User ID cleared');
+  }
+}
 Future<Map<String, dynamic>> sendComplaint({
   required bool isAnonymous,
   String? name,
@@ -13,9 +32,13 @@ Future<Map<String, dynamic>> sendComplaint({
   required String location,
 }) async {
   final urlforcomplaints= Uri.parse('http://localhost:5000/complaint');
-
+  final userId = await UserSession.getUserId();
+  
+  if (userId == null) {
+    return {'success': false, 'error': 'User not logged in'};
+  }
   final body = jsonEncode({
-    'userId': HARDCODED_USER_ID,
+    'userId':userId,
     'is_anonymous': isAnonymous,
     'name': isAnonymous ? null : name,
     'category': category,
@@ -50,8 +73,14 @@ Future<Map<String, dynamic>> sendComplaint({
 
 
 Future<String?> fetchLatestComplaintId() async {
+  final userId = await UserSession.getUserId();
+  
+  if (userId == null) {
+    print('Error: User not logged in');
+    return null;
+  }
   final url = Uri.parse(
-    '$baseUrl/complaint/latest/$HARDCODED_USER_ID',
+    '$baseUrl/complaint/latest/$userId',
   );
 
   try {
@@ -82,9 +111,15 @@ Future<bool> sendresponse({
   List<String>? freeTextAnswers,
 }) async {
   final url = Uri.parse('$baseUrl/responses');
+  final userId = await UserSession.getUserId();
+  
+  if (userId == null) {
+    print('Error: User not logged in');
+    return false;
+  }
 
   final body = jsonEncode({
-    'userId': HARDCODED_USER_ID,
+    'userId': userId,
     'questionIds': questionIds,
     'answers': answers,
     if (freeTextAnswers != null) 'freeTextAnswers': freeTextAnswers,
@@ -107,5 +142,57 @@ Future<bool> sendresponse({
   } catch (error) {
     print('Error sending responses: $error');
     return false;
+  }
+}
+
+
+
+//gettingresponsefromusersignup
+
+Future<Map<String, dynamic>> signupOrganisationUser({
+  required String fullName,
+  required String email,
+  required String password,
+  required String organisationId,
+}) async {
+  final url = Uri.parse('$baseUrl/api/org-user/signup');
+
+  final body = jsonEncode({
+    'fullName': fullName,
+    'email': email,
+    'password': password,
+    'organisationId': organisationId,
+  });
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      
+      // IMPORTANT: Save the userId to local storage
+      final userId = data['userId'];
+      await UserSession.saveUserId(userId);
+      
+      print('✅ Signup successful. User ID: $userId');
+      
+      return {
+        'success': true,
+        'userId': userId,
+        'email': data['email'],
+        'message': data['message']
+      };
+    } else {
+      final error = jsonDecode(response.body);
+      print('❌ Signup failed: ${error['error']}');
+      return {'success': false, 'error': error['error']};
+    }
+  } catch (e) {
+    print('❌ Error during signup: $e');
+    return {'success': false, 'error': e.toString()};
   }
 }
